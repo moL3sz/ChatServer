@@ -5,6 +5,55 @@ import time
 import os
 import sys
 s = socket.socket()
+def JoinRoom(username):
+    cc()
+    print("=====JOIN ROOM=====")
+    print("Please enter the room code!")
+    code = input("CODE: ")
+    print()
+    sendData = "ROOM#JOIN#{}#{}".format(code,username).encode("utf-8")
+    s.send(sendData)
+    reply = s.recv(1024).decode("utf-8")
+    h,r = reply.split("#")
+    if h == "JOIN":
+        if bool(int(r)):
+            print("JOINED")
+            a = input()
+        else:
+            print(f"No room has found on code: {code}")
+    else:
+        raise Exception("Something went wrong :(")
+
+
+    pass
+def CreateRoom(username):
+    pass
+def LoggedInOptions(username):
+    print("="*10)
+    options = ["Join Room","Create Room","Exit"]
+    functOptions =[JoinRoom,CreateRoom,ExitPage]
+    cc()
+    opts = 0
+    index = 0
+    print("/=====***======\\")
+    printOption(options,index)
+    while opts != 3:
+        if msvcrt.kbhit():
+            key = msvcrt.getch()
+            cc()
+            print("/=====***======\\")
+            if key == b'H':
+               index -= 1
+            if key == b'P':
+                index +=1
+            if key == b"\r":
+                opts = index
+                break
+            if key == b"\x1b":
+                functOptions[-1]()
+            printOption(options,index)
+    functOptions[abs(opts)%3](username)
+
 def cc():
     os.system("cls")
 def LoginPage():
@@ -12,7 +61,6 @@ def LoginPage():
     cc()
     options = ["Username: ","Password: "]
     print("===== Login Page =====")
-    i = 0
     usr = input(options[0])
     pwd = ""
     print(options[1],end="",flush=True)
@@ -28,8 +76,17 @@ def LoginPage():
     s.send(dataToSend)
     reply = s.recv(1024).decode("utf-8")
     header,logged = reply.split("#")
-    if bool(logged):
-        print("[+] Logged Successfuly")
+    print("\n")
+    if header == "LOGIN":
+        if bool(int(logged)):
+            print("[+] Logged Successfuly")
+            time.sleep(1)
+            LoggedInOptions(usr)
+            cc()
+        else:
+            print("[-] Wrong Username or password!")
+            time.sleep(1)
+            WelcomePage()
     pass
 def RegistrationPage():
     pass
@@ -51,6 +108,7 @@ def WelcomePage():
     opts = 0
     index = 0
     print("Welcome on The Chat Server")
+
     printOption(options,index)
     while opts != 3:
         if msvcrt.kbhit():
@@ -67,7 +125,7 @@ def WelcomePage():
             if key == b"\x1b":
                 functOptions[-1]()
             printOption(options,index)
-    functOptions[opts]()
+    functOptions[abs(opts)%3]()
 
 def connect():
     global s
@@ -86,6 +144,4 @@ def connect():
 def main():
     if connect():
         WelcomePage()
-
-
 main()
