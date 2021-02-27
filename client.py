@@ -4,7 +4,31 @@ import msvcrt
 import time
 import os
 import sys
+from threading import Thread
 s = socket.socket()
+def inputThread(username):
+    while True:
+        print(f"\033[{20-1};{0}H")
+        msg = input(": ")
+        parsedData = "ROOM#MESSAGE#{}#{}".format(username,msg).encode("utf-8")
+        s.send(parsedData)
+def inRoomPage():
+    print("/===== Welcom in the room =====\\")
+    buffer = ["" for _ in range(20)]
+    out = False
+    index = -1
+    while True:
+        recvData = s.recv(2048).decode("utf-8")
+        if len(recvData) > 0:
+            print(recvData)
+        if out:
+            print("Leaving")
+def HandleInRoomThreads(username):
+    inputT = Thread(target=inputThread,args=[username])
+    inputT.start()
+    recvT = Thread(target=inRoomPage)
+    recvT.start()
+    pass
 def JoinRoom(username):
     cc()
     print("=====JOIN ROOM=====")
@@ -18,14 +42,12 @@ def JoinRoom(username):
     if h == "JOIN":
         if bool(int(r)):
             print("JOINED")
+            HandleInRoomThreads(username)
             a = input()
         else:
             print(f"No room has found on code: {code}")
     else:
-        raise Exception("Something went wrong :(")
-
-
-    pass
+        pass
 def CreateRoom(username):
     pass
 def LoggedInOptions(username):

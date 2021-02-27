@@ -36,6 +36,13 @@ def waitingClientConnection():
         connection = Connection(con,addr,True)
         print(f"[*] Connection from: {addr[0]}:{addr[1]}")
         connections.append(connection)
+def inRoomHandle():
+    while True:
+        for k,m in zip(rooms.keys(),rooms.values()):
+            for conn,username in m:
+                data = conn.socket.recv(2048).decode("utf-8")
+                if len(data) > 0:
+                    print(data)
 def recieveData():
     print("Yes")
     while True:
@@ -63,6 +70,8 @@ def handleThreads():
     handleConnections.start()
     handleDatarecv = Thread(target=recieveData)
     handleDatarecv.start()
+    handleRoomMessages = Thread(target=inRoomHandle)
+    handleRoomMessages.start()
 def main():
     createServer()
     handleThreads()
